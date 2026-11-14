@@ -25,19 +25,21 @@ class GraphTexts:
     y_label: str
 
 
-def _set_common_values(ax: Axes, texts: GraphTexts | None, grid: str = ""):
+def _set_common_values(ax: Axes, texts: GraphTexts = None, grid: str = ""):
     '''
     Sets values that all graphs share, such as titles and labels
 	'''
 
-    ax.set_title(texts.title)
-    ax.set_xlabel(texts.x_label)
-    ax.set_ylabel(texts.y_label)
+    if texts:
+        ax.set_title(texts.title)
+        ax.set_xlabel(texts.x_label)
+        ax.set_ylabel(texts.y_label)
+
     if grid == "both" or grid == "x" or grid == "y":
         ax.grid(axis=grid)
 
 
-def box(ax: Axes, df: pd.DataFrame, texts: GraphTexts | None):
+def box(ax: Axes, df: pd.DataFrame, texts: GraphTexts = None):
     '''
     Creates a box plot
 
@@ -48,19 +50,19 @@ def box(ax: Axes, df: pd.DataFrame, texts: GraphTexts | None):
     _set_common_values(ax, texts, "y")
 
 
-def grouped_bar(ax: Axes, df: pd.DataFrame, texts: GraphTexts | None):
+def grouped_bar(ax: Axes, height: pd.DataFrame, tick_labels, texts: GraphTexts = None):
     '''
     Creates a grouped bar chart
 
     Not done
     '''
 
-    ax.grouped_bar(df)
+    ax.grouped_bar(height, tick_labels=tick_labels)
     ax.legend()
     _set_common_values(ax, texts, "y")
 
 
-def hist(ax: Axes, df: pd.DataFrame, bins: int, texts: GraphTexts | None):
+def hist(ax: Axes, df: pd.DataFrame, bins: int, texts: GraphTexts = None):
     '''
     Creates a histogram with the supplied values
 
@@ -77,7 +79,7 @@ def hist(ax: Axes, df: pd.DataFrame, bins: int, texts: GraphTexts | None):
     _set_common_values(ax, texts, "y")
 
 
-def line(ax: Axes, df: pd.DataFrame, texts: GraphTexts | None):
+def line(ax: Axes, df: pd.DataFrame, texts: GraphTexts = None):
     '''
     Creates a line graph
 
@@ -89,7 +91,7 @@ def line(ax: Axes, df: pd.DataFrame, texts: GraphTexts | None):
 
 
 def scatter(ax: Axes, x: pd.DataFrame, y: pd.DataFrame,
-            texts: GraphTexts | None, trend: bool = False):
+            texts: GraphTexts = None, trend: bool = False):
     '''
     Creates a scatter plot with the supplied values
 
