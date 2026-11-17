@@ -27,7 +27,7 @@ class Person:
             weight_range: tuple[float, float],
             bp_range: tuple[float, float],
             cholesterol_range: tuple[float, float],
-            smoker_rate_by_gender: tuple[float, float],
+            smoker_rate: float,
             disease_rate: float
             ):
         '''
@@ -44,7 +44,7 @@ class Person:
 
         cholesterol_range: Cholesterol from low to high, without decimals
 
-        smoker_rate_by_gender: Rate of how many are smokers by gender, male to female
+        smoker_rate: Rate of how many are smokers
 
         disease_rate: Rate of how many people in the data set have the disease
         '''
@@ -58,5 +58,5 @@ class Person:
         self.cholesterol = random.randint(
             int(cholesterol_range[0]) * 100,
             int(cholesterol_range[1]) * 100) / 100
-        self.smoker = int(random.randint(0, 100) < smoker_rate_by_gender[gender_int])
+        self.smoker = int(random.randint(0, 100) < smoker_rate)
         self.disease = int(random.randint(0, 100) < disease_rate)

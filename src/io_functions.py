@@ -14,15 +14,16 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     output["smoker"] = output["smoker"].map({"No": 0, "Yes": 1})
     return output
 
-def compose_values(s: pd.Series, column_name: str):
+def compose_values(s: pd.Series) -> str:
     '''
-    Prints mean, median, min and max values for the provided DataFrame
+    Returns mean, median, min and max values for the provided DataFrame
 
     s: Column to get values from
 
     column_name: String to be printed before the composed values
     '''
-    print(f"{column_name}:  Mean: {mean(s)}, Median: {median(s)}, Min: {s.min()}, Max: {s.max()}")
+
+    return f"Mean: {mean(s)}, Median: {median(s)}, Min: {s.min()}, Max: {s.max()}"
 
 def mean(s: pd.Series):
     '''Returns the mean values of the supplied Series'''

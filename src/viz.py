@@ -50,7 +50,12 @@ def box(ax: Axes, df: pd.DataFrame, texts: GraphTexts = None):
     _set_common_values(ax, texts, "y")
 
 
-def grouped_bar(ax: Axes, height: pd.DataFrame, tick_labels, texts: GraphTexts = None):
+def grouped_bar(
+    ax: Axes,
+    height: dict[str, list],
+    tick_labels: list[str],
+    texts: GraphTexts = None
+):
     '''
     Creates a grouped bar chart
 
