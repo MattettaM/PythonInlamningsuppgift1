@@ -42,6 +42,34 @@ def _set_common_values(ax: Axes, texts: GraphTexts | None = None, grid: str = ""
         ax.grid(axis=grid)
 
 
+def add_normal_fit(ax: Axes, s: pd.Series, color: str | None = None, label: str = "", bins = 0):
+    '''
+    Adds a normal distribution to a plot
+    
+    ax: Plot you want to modify
+
+    s: Series to show the normal distribution of
+
+    color: Optional color
+
+    label: Optional label
+
+    bins: If plotted to a histogram bins scales the plot
+    '''
+    values = s.to_numpy()
+    mean = values.mean()
+    std = values.std(ddof=1)
+
+    x = np.linspace(values.min(), values.max(), 300)
+    pdf = np.exp(-0.5 * ((x - mean) / std) ** 2) / (std * np.sqrt(2 * np.pi))
+
+    if bins:
+        bin_edges = np.histogram_bin_edges(values, bins)
+        pdf *= len(values) * np.diff(bin_edges).mean()
+
+    ax.plot(x, pdf, color=color, linewidth=2, label=f"{label} normal fit")
+
+
 def box(ax: Axes, s: pd.Series, tick_labels: list[str], texts: GraphTexts | None = None):
     '''
     Creates a box plot
@@ -80,7 +108,7 @@ def grouped_bar(
     _set_common_values(ax, texts, "y")
 
 
-def hist(ax: Axes, s: pd.Series, bins: int, texts: GraphTexts | None = None, label: str | None = None, color: str | None = None):
+def hist(ax: Axes, s: pd.Series, bins: int, texts: GraphTexts | None = None, labels: str | list[str] | None = None, color: str | None = None):
     '''
     Creates a histogram with the supplied values
 
@@ -91,9 +119,13 @@ def hist(ax: Axes, s: pd.Series, bins: int, texts: GraphTexts | None = None, lab
     bins: The number of bars you want the data to be displayed in
 
     texts: Optional title and axis labels
+
+    labels: Optional label names for legend
+
+    color: Optional color string
     '''
 
-    ax.hist(s, bins=bins, color=color, label=label, alpha=0.9)
+    ax.hist(s, bins=bins, color=color, label=labels, alpha=0.9)
     _set_common_values(ax, texts, "y")
 
 
@@ -108,11 +140,7 @@ def scatter(ax: Axes, x: pd.Series, y: pd.Series,
 
     y: Series with the y-values to display
 
-    title: Optional chart title
-
-    x_label: Optional x label
-
-    y_label: Optional y label
+    texts: Optional title and axis labels
 
     trend: Should a trend line be displayed?
     '''
