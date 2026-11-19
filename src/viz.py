@@ -87,7 +87,8 @@ def box(ax: Axes, s: pd.Series, tick_labels: list[str], texts: GraphTexts | None
 
 def grouped_bar(
     ax: Axes,
-    height: dict[str, list],
+    height: list[list],
+    labels: list[str],
     tick_labels: list[str],
     texts: GraphTexts | None = None
 ):
@@ -103,7 +104,7 @@ def grouped_bar(
     texts: Optional title and axis labels
     '''
 
-    ax.grouped_bar(height, tick_labels=tick_labels)
+    ax.grouped_bar(height, labels=labels, tick_labels=tick_labels)
     ax.legend()
     _set_common_values(ax, texts, "y")
 
@@ -149,5 +150,5 @@ def scatter(ax: Axes, x: pd.Series, y: pd.Series,
     if trend:
         z = np.polyfit(x, y, 1)
         p = np.poly1d(z)
-        ax.plot(x, p(x), "r")
+        ax.plot(x, p(x.to_numpy()), "r")
     _set_common_values(ax, texts, "both")

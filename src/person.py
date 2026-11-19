@@ -7,7 +7,6 @@ import numpy as np
 class Person:
     '''
     Contains all values for a person from the dataset
-    and functions for generating a random person
     '''
 
     age: int
