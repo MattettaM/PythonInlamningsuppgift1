@@ -1,12 +1,12 @@
 '''
     Methods for visualising data
 '''
-
 from dataclasses import dataclass
 
-from matplotlib.axes import Axes
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
+
 
 @dataclass
 class GraphTexts:
@@ -20,33 +20,40 @@ class GraphTexts:
     y_label: The label of the y axis
     '''
 
-    title: str
-    x_label: str
-    y_label: str
+    title: str = ""
+    x_label: str = ""
+    y_label: str = ""
 
 
-def _set_common_values(ax: Axes, texts: GraphTexts = None, grid: str = ""):
+def _set_common_values(ax: Axes, texts: GraphTexts | None = None, grid: str = ""):
     '''
     Sets values that all graphs share, such as titles and labels
 	'''
 
     if texts:
-        ax.set_title(texts.title)
-        ax.set_xlabel(texts.x_label)
-        ax.set_ylabel(texts.y_label)
+        if texts.title:
+            ax.set_title(texts.title)
+        if texts.x_label:
+            ax.set_xlabel(texts.x_label)
+        if texts.y_label:
+            ax.set_ylabel(texts.y_label)
 
     if grid == "both" or grid == "x" or grid == "y":
         ax.grid(axis=grid)
 
 
-def box(ax: Axes, df: pd.DataFrame, texts: GraphTexts = None):
+def box(ax: Axes, s: pd.Series, tick_labels: list[str], texts: GraphTexts | None = None):
     '''
     Creates a box plot
 
-    Not done
+    ax: The subplot you want to modify
+
+    s: Series of values to display as boxes
+
+    tick_labels: List of strings for group names, indices must match Series indices
     '''
 
-    ax.box(df)
+    ax.boxplot(s, notch=True, tick_labels=tick_labels, bootstrap=5000)
     _set_common_values(ax, texts, "y")
 
 
@@ -54,12 +61,18 @@ def grouped_bar(
     ax: Axes,
     height: dict[str, list],
     tick_labels: list[str],
-    texts: GraphTexts = None
+    texts: GraphTexts | None = None
 ):
     '''
     Creates a grouped bar chart
 
-    Not done
+    ax: The subplot you want to modify
+
+    height: Set of values to group in the bar chart, list entires must match tick_labels
+
+    tick_labels: The groups to sort the bars into
+
+    texts: Optional title and axis labels
     '''
 
     ax.grouped_bar(height, tick_labels=tick_labels)
@@ -67,44 +80,33 @@ def grouped_bar(
     _set_common_values(ax, texts, "y")
 
 
-def hist(ax: Axes, df: pd.DataFrame, bins: int, texts: GraphTexts = None):
+def hist(ax: Axes, s: pd.Series, bins: int, texts: GraphTexts | None = None, label: str | None = None, color: str | None = None):
     '''
     Creates a histogram with the supplied values
 
     ax: The subplot that you want to modify
 
-    df: DataFrame of the values you want to display
+    s: Series of the values you want to display
 
     bins: The number of bars you want the data to be displayed in
 
     texts: Optional title and axis labels
     '''
 
-    ax.hist(df, bins=bins)
+    ax.hist(s, bins=bins, color=color, label=label, alpha=0.9)
     _set_common_values(ax, texts, "y")
 
 
-def line(ax: Axes, df: pd.DataFrame, texts: GraphTexts = None):
-    '''
-    Creates a line graph
-
-    Not done
-    '''
-
-    ax.plot(df)
-    _set_common_values(ax, texts, "both")
-
-
-def scatter(ax: Axes, x: pd.DataFrame, y: pd.DataFrame,
-            texts: GraphTexts = None, trend: bool = False):
+def scatter(ax: Axes, x: pd.Series, y: pd.Series,
+            texts: GraphTexts | None = None, trend: bool = False):
     '''
     Creates a scatter plot with the supplied values
 
     ax: The plot you want to modify
 
-    x: DataFrame with the x-values to display
+    x: Series with the x-values to display
 
-    y: DataFrame with the y-values to display
+    y: Series with the y-values to display
 
     title: Optional chart title
 
