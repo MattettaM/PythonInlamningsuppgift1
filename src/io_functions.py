@@ -3,8 +3,8 @@
 '''
 import numpy as np
 import pandas as pd
-import scipy
-from scipy.stats import truncnorm
+from scipy import stats
+from statsmodels.stats import power
 
 
 def bootstrap_ci(a: pd.Series, b: pd.Series, perms = 1000):
@@ -22,6 +22,18 @@ def bootstrap_ci(a: pd.Series, b: pd.Series, perms = 1000):
     p_perm = np.mean(np.abs(perm_diffs) >= abs(obs_diff))
     ci_low_perm, ci_high_perm = np.percentile(perm_diffs, [2.5, 97.5])
     return obs_diff, p_perm, (ci_low_perm, ci_high_perm)
+
+def calc_power(a: pd.Series, b: pd.Series, alt: str = "two-sided"):
+    '''Calculates and returns power with a 5% significance level'''
+
+    n_a, n_b = len(a), len(b)
+    pooled_sd = np.sqrt(
+        ((n_a - 1) * a.std()**2 + (n_b - 1) * b.std()**2) / (n_a + n_b - 2)
+    )
+
+    effect = (a.mean() - b.mean()) / pooled_sd
+
+    return power.TTestIndPower().power(effect, n_a, 0.05, (n_b / n_a), alternative=alt) # type: ignore
 
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -53,7 +65,7 @@ def get_truncated_normal(
     high: float
 ):
     '''Returns an object that can generate a random normal distributed number within 2 points'''
-    return truncnorm(
+    return stats.truncnorm(
         (low - mean) / sd, (high - mean) / sd, loc = mean, scale = sd
     )
 
@@ -81,6 +93,6 @@ def t_test(s1: pd.Series, s2: pd.Series, equal_var=True, alternative="two-sided"
     Perform a t-test comparison between 2 Series
     returns a tuple with the t_score and p_value as floats
     '''
-    t_score, p_value = scipy.stats.ttest_ind(s1, s2, equal_var=equal_var, alternative=alternative)
+    t_score, p_value = stats.ttest_ind(s1, s2, equal_var=equal_var, alternative=alternative)
 
     return (t_score, p_value)
