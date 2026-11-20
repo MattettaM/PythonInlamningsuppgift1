@@ -4,6 +4,7 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
+from scipy.stats import norm
 from statsmodels.stats import power
 
 
@@ -23,8 +24,16 @@ def bootstrap_ci(a: pd.Series, b: pd.Series, perms = 1000):
     ci_low_perm, ci_high_perm = np.percentile(perm_diffs, [2.5, 97.5])
     return obs_diff, p_perm, (ci_low_perm, ci_high_perm)
 
-def calc_power(a: pd.Series, b: pd.Series, alt: str = "two-sided"):
-    '''Calculates and returns power with a 5% significance level'''
+def calc_power(a: pd.Series, b: pd.Series, alt: str = "two-sided") -> float:
+    '''
+    Calculates and returns power with a 5% significance level
+    
+    a: The first data sample
+
+    b: The second data sample
+
+    alt: What calculation to use, two-sided, larger, or smaller
+    '''
 
     n_a, n_b = len(a), len(b)
     pooled_sd = np.sqrt(
@@ -64,7 +73,17 @@ def get_truncated_normal(
     low: float,
     high: float
 ):
-    '''Returns an object that can generate a random normal distributed number within 2 points'''
+    '''
+    Returns an object that can generate a random normal distributed number within 2 points
+    
+    mean: The mean value of data
+
+    sd: Standard deviation
+
+    low: Lowest value of the data
+
+    high: Highest value of the data
+    '''
     return stats.truncnorm(
         (low - mean) / sd, (high - mean) / sd, loc = mean, scale = sd
     )
@@ -80,6 +99,14 @@ def median(s: pd.Series):
 def minmax(s: pd.Series) -> tuple:
     '''Returns the min and the max value of the supplied Series as a tuple'''
     return (s.min(), s.max())
+
+def normal_mean_ci(a: pd.Series, b: pd.Series) -> tuple:
+    '''Calculates the confidence interval between 2 samples using normal approximation'''
+    difference = a.mean() - b.mean()
+    se = np.sqrt(a.var() / len(a) + b.var() / len(b))
+    z = norm.ppf(0.975)
+
+    return (difference - z * se, difference + z * se)
 
 def print_composed_values(df: pd.DataFrame):
     print(f"Age: {compose_values(df["age"])}")
