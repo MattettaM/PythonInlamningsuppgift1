@@ -130,8 +130,14 @@ def hist(ax: Axes, s: pd.Series, bins: int, texts: GraphTexts | None = None, lab
     _set_common_values(ax, texts, "y")
 
 
-def scatter(ax: Axes, x: pd.Series, y: pd.Series,
-            texts: GraphTexts | None = None, trend: bool = False):
+def scatter(ax: Axes,
+            x: pd.Series,
+            y: pd.Series,
+            texts: GraphTexts | None = None,
+            dot_color: str | None = None,
+            trend_color: str | None = None,
+            label: str | None = None,
+            trend_label: str | None = None):
     '''
     Creates a scatter plot with the supplied values
 
@@ -143,12 +149,16 @@ def scatter(ax: Axes, x: pd.Series, y: pd.Series,
 
     texts: Optional title and axis labels
 
-    trend: Should a trend line be displayed?
+    trend_color: String for the color of the trend line. If not defined no trend line is displayed
+
+    label: String label for legend
+
+    trend_label: String label of trend line for legend
     '''
 
-    ax.scatter(x, y)
-    if trend:
+    ax.scatter(x, y, c=dot_color, alpha=0.8, label=label)
+    if trend_color:
         z = np.polyfit(x, y, 1)
         p = np.poly1d(z)
-        ax.plot(x, p(x.to_numpy()), "r")
+        ax.plot(x, p(x.to_numpy()), c=trend_color, label=trend_label)
     _set_common_values(ax, texts, "both")
