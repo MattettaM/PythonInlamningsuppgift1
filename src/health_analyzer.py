@@ -46,7 +46,7 @@ class HealthAnalyzer:
         Calculates the correlation between having the disease and higher blood pressure.
         Draws out histograms of the groupings, and prints out results of t-test, bootstrap, and normal approximation
         '''
-        _, axs = plt.subplots(1, 2, figsize=(16, 8))
+        _, axs = plt.subplots(1, 2, figsize=(16, 6))
 
         viz.hist(
             axs[0],
@@ -103,11 +103,11 @@ class HealthAnalyzer:
 	        self.healthy_df["systolic_bp"], self.sick_df["systolic_bp"], 10000
         )
 
-        print(f"Normal Approximation Confidence Interval:   Low:{normal_approx_ci[0]}, High: {normal_approx_ci[1]}")
-        print(f"Blood Pressure Bootstrap 1000:   Observed Diff: {bp_obsdiff_s}, P-Permutation: {bp_p_perm_s}, Confidence: {bp_ci_s[0]} : {bp_ci_s[1]}")
-        print(f"Blood Pressure Bootstrap 10000:   Observed Diff: {bp_obsdiff_l}, P-Permutation: {bp_p_perm_l}, Confidence: {bp_ci_l[0]} : {bp_ci_l[1]}")
-
-        print(f"Blood Pressure Correlation to Sickness:    t-score: {bp_t}, p-value: {bp_p}, power: {bp_power}")
+        print(
+f'''Normal Approximation Confidence Interval:   Low:{normal_approx_ci[0]}, High: {normal_approx_ci[1]}
+Blood Pressure Bootstrap 1000:   Observed Diff: {bp_obsdiff_s}, P-Permutation: {bp_p_perm_s}, Confidence: {bp_ci_s[0]} : {bp_ci_s[1]}
+Blood Pressure Bootstrap 10000:   Observed Diff: {bp_obsdiff_l}, P-Permutation: {bp_p_perm_l}, Confidence: {bp_ci_l[0]} : {bp_ci_l[1]}
+Blood Pressure Correlation to Sickness:    t-score: {bp_t}, p-value: {bp_p}, power: {bp_power}''')
 
 
     def compare_disease_cholsterol(self, bin_size: int = 20):
@@ -115,7 +115,7 @@ class HealthAnalyzer:
         Calculates the correlation between having the disease and having higher cholesterol levels
         Draws histograms of the groupings, and prints out t-test results
         '''
-        _, axs = plt.subplots(1, 2, figsize=(16, 8))
+        _, axs = plt.subplots(1, 2, figsize=(16, 6))
 
         viz.hist(
             axs[0],
@@ -163,30 +163,78 @@ class HealthAnalyzer:
         print(f"Cholesterol Correlation to Sickness:  t-score:{c_t}, p-value:{c_p}")
 
 
+    def draw_bp_correlation_scatters(self):
+        '''
+        Draws plots comparing bloodpressure with cholesterol and BMI
+        '''
+        _, axs = plt.subplots(1, 2, figsize=[16, 6])
+        viz.scatter(
+	        axs[0],
+            self.healthy_df["cholesterol"],
+            self.healthy_df["systolic_bp"],
+            GraphTexts(
+		        "Correlation of Cholesterol Levels and Blood Pressure",
+                "Cholesterol Level (mmol/L)",
+                "Blood Pressure (mmHg)"
+            ),
+            "blue",
+            "purple",
+            "Healthy",
+            "Healthy Trend"
+        )
+        viz.scatter(
+            axs[0],
+            self.sick_df["cholesterol"],
+            self.sick_df["systolic_bp"],
+            dot_color="orange",
+            trend_color = "red",
+            label="Sick",
+            trend_label="Sick Trend"
+        )
+
+        healthy_bmi = self.healthy_df["weight"] / ((self.healthy_df["height"] / 100) ** 2)
+        sick_bmi = self.sick_df["weight"] / ((self.sick_df["height"] / 100) ** 2)
+        viz.scatter(
+	        axs[1],
+            healthy_bmi,
+            self.healthy_df["systolic_bp"],
+            GraphTexts(
+		        "Correlation of BMI and Blood Pressure",
+                r"BMI (kg/m$^{2}$)",
+                "Blood Pressure (mmHg)"
+            ),
+            "blue",
+            "purple",
+            "Healthy",
+            "Healthy Trend"
+        )
+        viz.scatter(
+            axs[1],
+            sick_bmi,
+            self.sick_df["systolic_bp"],
+            dot_color="orange",
+            trend_color="red",
+            label="Sick",
+            trend_label="Sick Trend"
+        )
+        plt.legend()
+        plt.show()
+
+
     def print_values(self):
         '''Prints out the values of the data sets'''
-        print(f'''
-Data Set Sick Rate: {len(self.sick_df) / len(self.healthy_df) + len(self.sick_df)}
+        print(
+f'''Data Set Sick Rate: {len(self.sick_df) / len(self.healthy_df) + len(self.sick_df)}
 Random Set Sick Rate: {len(self.sick_rdf) / len(self.healthy_rdf) + len(self.sick_rdf)}
-
 {"-" * 20}
-
 Data Set Healthy Values
 {io_f.get_composed_values(self.healthy_df)}
-
 {"-" * 20}
-
 Data Set Sick Values
 {io_f.get_composed_values(self.sick_df)}
-
 {"-" * 20}
-
 Random Set Healthy Values
 {io_f.get_composed_values(self.healthy_rdf)}
-
 {"-" * 20}
-
 Random Set Sick Values
-{io_f.get_composed_values(self.sick_rdf)}
-        '''
-    )
+{io_f.get_composed_values(self.sick_rdf)}''')

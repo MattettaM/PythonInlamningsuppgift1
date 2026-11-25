@@ -5,6 +5,10 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from scipy.stats import norm
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from statsmodels.stats import power
 
 
@@ -24,6 +28,7 @@ def bootstrap_ci(a: pd.Series, b: pd.Series, perms = 1000):
     ci_low_perm, ci_high_perm = np.percentile(perm_diffs, [2.5, 97.5])
     return obs_diff, p_perm, (ci_low_perm, ci_high_perm)
 
+
 def calc_power(a: pd.Series, b: pd.Series, alt: str = "two-sided") -> float:
     '''
     Calculates and returns power with a 5% significance level
@@ -34,7 +39,6 @@ def calc_power(a: pd.Series, b: pd.Series, alt: str = "two-sided") -> float:
 
     alt: What calculation to use, two-sided, larger, or smaller
     '''
-
     n_a, n_b = len(a), len(b)
     pooled_sd = np.sqrt(
         ((n_a - 1) * a.std()**2 + (n_b - 1) * b.std()**2) / (n_a + n_b - 2)
@@ -43,8 +47,8 @@ def calc_power(a: pd.Series, b: pd.Series, alt: str = "two-sided") -> float:
     effect = (a.mean() - b.mean()) / pooled_sd
 
     return power.TTestIndPower().power(
-        effect, n_a, 0.05, (n_b / n_a), alternative=alt
-    ) # type: ignore
+        effect, n_a, 0.05, (n_b / n_a), alternative=alt #type: ignore
+    )
 
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -58,6 +62,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     output["smoker"] = output["smoker"].map({"No": 0, "Yes": 1})
     return output
 
+
 def compose_values(s: pd.Series) -> str:
     '''
     Returns mean, median, min and max values for the provided DataFrame
@@ -66,8 +71,17 @@ def compose_values(s: pd.Series) -> str:
 
     column_name: String to be printed before the composed values
     '''
-
     return f"Mean: {mean(s)}, Median: {median(s)}, Min: {s.min()}, Max: {s.max()}"
+
+
+def get_composed_values(df: pd.DataFrame):
+    '''Return gathered values in a nice format'''
+    return f'''Age: {compose_values(df["age"])}
+Height: {compose_values(df["height"])}
+Weight: {compose_values(df["weight"])}
+Blood Pressure: {compose_values(df["systolic_bp"])}
+Cholesterol: {compose_values(df["cholesterol"])}'''
+
 
 def get_truncated_normal(
     n_mean: float,
@@ -90,17 +104,21 @@ def get_truncated_normal(
         (low - n_mean) / sd, (high - n_mean) / sd, loc = n_mean, scale = sd
     )
 
+
 def mean(s: pd.Series):
     '''Returns the mean values of the supplied Series'''
     return round(s.mean(), 2)
+
 
 def median(s: pd.Series):
     '''Returns the median values of the supplied Series'''
     return round(s.median(), 2)
 
+
 def minmax(s: pd.Series) -> tuple:
     '''Returns the min and the max value of the supplied Series as a tuple'''
     return (s.min(), s.max())
+
 
 def normal_mean_ci(a: pd.Series, b: pd.Series) -> tuple:
     '''Calculates the confidence interval between 2 samples using normal approximation'''
@@ -110,20 +128,42 @@ def normal_mean_ci(a: pd.Series, b: pd.Series) -> tuple:
 
     return (difference - z * se, difference + z * se)
 
-def get_composed_values(df: pd.DataFrame):
-    '''Return gathered values in a nice format'''
-    return f'''
-Age: {compose_values(df["age"])}
-Height: {compose_values(df["height"])}
-Weight: {compose_values(df["weight"])}
-Blood Pressure: {compose_values(df["systolic_bp"])}
-Cholesterol: {compose_values(df["cholesterol"])}
+
+def perform_linear_regression(X: pd.DataFrame, y: pd.DataFrame) -> tuple[float, float]:
     '''
+    Performs a linear regression calculation and returns a tuple of r2 and mse
+
+    X: The "input" data that we want to find correlation to y with
+
+    y: The "target" value we want to correlate with X
+    '''
+    model = LinearRegression()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
+    model.fit(X_train_scaled, y_train)
+    y_pred = model.predict(X_test_scaled)
+
+    r2 = r2_score(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    return (r2, mse)
+
 
 def t_test(s1: pd.Series, s2: pd.Series, equal_var=True, alternative="two-sided") -> tuple:
     '''
     Perform a t-test comparison between 2 Series
     returns a tuple with the t_score and p_value as floats
+
+    s1: Series 1
+
+    s2: Series 2
+
+    equal_var: Should it treat them as same variance? False for Welch t-test
+
+    alternative: two-sided, less, or greater
     '''
     t_score, p_value = stats.ttest_ind(s1, s2, equal_var=equal_var, alternative=alternative)
 
